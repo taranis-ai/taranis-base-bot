@@ -1,30 +1,21 @@
-from flask import request
 from functools import wraps
-
-from summarize_bot.config import Config
-from summarize_bot.log import logger
-
+from flask import request, current_app
+from taranis_base_bot.log import logger
 
 def api_key_required(fn):
     @wraps(fn)
-    async def wrapper(*args, **kwargs):
-        if not Config.API_KEY:
-            return await fn(*args, **kwargs)
+    def wrapper(*args, **kwargs):
+        api_key = (current_app.config.get("API_KEY") or "").strip()
+        if not api_key:
+            return fn(*args, **kwargs)
 
-        error = ({"error": "not authorized"}, 401)
-        auth_header = request.headers.get("Authorization", None)
-
-        if not auth_header or not auth_header.startswith("Bearer"):
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
             logger.warning("Missing Authorization Bearer")
-            return error
-
-        api_key = auth_header.replace("Bearer ", "")
-
-        if Config.API_KEY != api_key:
+            return {"error": "not authorized"}, 401
+        if auth.removeprefix("Bearer ").strip() != api_key:
             logger.warning("Incorrect api key")
-            return error
+            return {"error": "not authorized"}, 401
 
-        # allow
-        return await fn(*args, **kwargs)
-
+        return fn(*args, **kwargs)
     return wrapper

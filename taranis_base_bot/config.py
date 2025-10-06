@@ -1,4 +1,3 @@
-from __future__ import annotations
 from datetime import datetime
 from functools import lru_cache
 from typing import Any, Dict, Optional
