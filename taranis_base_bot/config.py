@@ -10,8 +10,7 @@ class CommonSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        extra="ignore",
-        env_nested_delimiter="__",
+        extra="ignore"
     )
 
     MODULE_ID: str = "TaranisBot"
@@ -31,7 +30,6 @@ class CommonSettings(BaseSettings):
             print("API_KEY is not set or empty, disabling API key requirement")
         return v
 
-# Prefer a getter over a module-level instance
 @lru_cache(maxsize=1)
 def get_settings() -> CommonSettings:
     return CommonSettings()
