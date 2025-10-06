@@ -5,7 +5,7 @@ import sys
 import traceback
 from typing import Optional
 
-from quart import request
+from flask import request
 
 from taranis_base_bot.config import Config
 

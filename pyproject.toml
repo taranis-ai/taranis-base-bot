@@ -13,7 +13,7 @@ classifiers = [
 ]
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "Quart",
+    "flask",
     "requests",
     "granian",
     "torch",

@@ -1,4 +1,4 @@
-from quart import request
+from flask import request
 from functools import wraps
 
 from summarize_bot.config import Config

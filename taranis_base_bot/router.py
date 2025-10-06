@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Callable, Any, Dict, Optional, List
-from quart import Blueprint, jsonify, request
-from quart.views import MethodView
+from flask import Blueprint, jsonify, request
+from flask.views import MethodView
 
 JSON = Dict[str, Any]
 
