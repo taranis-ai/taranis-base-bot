@@ -1,0 +1,57 @@
+[project]
+name = "taranis-base-bot"
+description = "Base repo for taranis bots"
+readme = "README.md"
+license = {file = "LICENSE.md"}
+maintainers = [{ name = "AIT", email = "lukas.linauer@ait.ac.at" }]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "Quart",
+    "requests",
+    "granian",
+    "torch",
+    "pydantic-settings",
+    "python-dotenv",
+    "simplemma>=1.1.2",
+    "requests-mock>=1.12.1",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["pytest", "jsonschema", "ruff"]
+
+[project.urls]
+"Source Code" = "https://github.com/taranis-ai/taranis-base-bot"
+
+[build-system]
+requires = [
+    "setuptools>=45",
+    "setuptools_scm[toml]>=6.2",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"
+tag_regex = "^refs/pull/(\\d+)/merge$"
+
+[tool.setuptools]
+packages = ["taranis_base_bot"]
+
+[tool.ruff]
+line-length = 142
+target-version = "py312"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:.*_app_ctx_stack.*:DeprecationWarning",
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning"
+]
