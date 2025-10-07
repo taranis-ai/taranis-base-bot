@@ -104,3 +104,30 @@ def test_wrong_api_key(client_with_api_key):
     assert response.status_code == 401
     data = response.get_json()
     assert data["error"] == "not authorized"
+
+def test_modelinfo_func_ok(requests_mock, client_with_modelinfo_fn):
+    requests_mock.get(
+        "https://huggingface.co/api/models/test_model",
+        json={"model": "test_model", "ok": True},
+        status_code=200,
+    )
+
+    response = client_with_modelinfo_fn.get("/modelinfo")
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert data == {"model": "test_model", "ok": True}
+
+
+def test_modelinfo_func_error(requests_mock, client_with_modelinfo_fn):
+    """Modelinfo endpoint should handle network errors gracefully."""
+    requests_mock.get(
+        "https://huggingface.co/api/models/test_model",
+        exc=Exception("Connection failed"),
+    )
+
+    response = client_with_modelinfo_fn.get("/modelinfo")
+    assert response.status_code == 200 
+
+    data = response.get_json()
+    assert data == {"model": "test_model", "error": "Connection failed"}

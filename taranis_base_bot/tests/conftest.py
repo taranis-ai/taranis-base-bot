@@ -2,6 +2,7 @@ import pytest
 
 from taranis_base_bot.config import get_settings
 from taranis_base_bot.decorators import api_key_required
+from taranis_base_bot.modelinfo import get_hf_modelinfo
 
 Config = get_settings()
 
@@ -56,6 +57,22 @@ def client_with_predict():
         url_prefix="/",
         predict_fn=predict_func,
         modelinfo_fn=lambda : {"model": "test"},
+        request_parser=lambda x: x,
+        method_decorators=[]
+    )
+    app.config["TESTING"] = True
+    with app.test_client() as client:
+        yield client
+
+@pytest.fixture
+def client_with_modelinfo_fn():
+    from taranis_base_bot import create_app
+
+    app = create_app(
+        name="taranis_base_bot",
+        url_prefix="/",
+        predict_fn=lambda **kwargs: kwargs,
+        modelinfo_fn=lambda : get_hf_modelinfo("test_model"),
         request_parser=lambda x: x,
         method_decorators=[]
     )
