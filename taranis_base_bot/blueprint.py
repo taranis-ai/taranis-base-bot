@@ -23,7 +23,7 @@ class InferenceView(MethodView):
     def post(self):
         data = request.get_json()
         if not isinstance(data, dict):
-            return jsonify({"error": "JSON payload must be an object"}), 400
+            return jsonify({"error": "Payload must be a dict!"}), 400
         try:
             kwargs = self._parse(data)
         except ValueError as e:
@@ -42,9 +42,9 @@ class HealthView(MethodView):
 
 
 class ModelInfoView(MethodView):
-    def __init__(self, modelinfo_provider: Callable[[], Any]) -> None:
+    def __init__(self, modelinfo_fn: Callable[[], Any]) -> None:
         super().__init__()
-        self._modelinfo = modelinfo_provider
+        self._modelinfo = modelinfo_fn
 
     def get(self):
         return jsonify(self._modelinfo())
@@ -55,7 +55,7 @@ def create_service_blueprint(
     name: str,
     url_prefix: str = "/",
     predict_fn: Callable[..., Any],
-    modelinfo_provider: Callable[[], Any],
+    modelinfo_fn: Callable[[], Any],
     request_parser: Callable[[JSON], Dict[str, Any]],
     method_decorators: List[Callable] | None = None
     ):
@@ -82,7 +82,7 @@ def create_service_blueprint(
     health_view = HealthView.as_view(f"{name}_health")
     modelinfo_view = ModelInfoView.as_view(
         f"{name}_modelinfo",
-        modelinfo_provider=modelinfo_provider,
+        modelinfo_fn=modelinfo_fn,
     )
 
     bp.add_url_rule("/", view_func=inference_view, methods=["POST"])
