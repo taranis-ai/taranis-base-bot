@@ -2,11 +2,10 @@ from functools import wraps
 from flask import request, current_app
 from taranis_base_bot.log import get_logger
 
-logger = get_logger()
-
 def api_key_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
+        logger = get_logger()
         api_key = (current_app.config.get("API_KEY") or "").strip()
         if not api_key:
             return fn(*args, **kwargs)

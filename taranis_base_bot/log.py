@@ -89,23 +89,21 @@ class Logger(TaranisBotLogger):
         return str(request.data)[:4096].replace("\\r", "").replace("\\n", "").replace(" ", "")[2:-1]
 
 
-def configure_logger(settings_provider: Callable = get_settings, syslog_address: tuple[str, int] | None = None) -> None:
-    """
-    Build the global logger using the provided settings.
-    """
+_logger: TaranisBotLogger | None = None
+
+def configure_logger(
+    *,
+    module: str,
+    debug: bool,
+    colored: bool,
+    syslog_address: Optional[tuple[str, int]] = None,
+) -> None:
+
     global _logger
-    config = settings_provider()
-    _logger = Logger(module=config.MODULE_ID, colored=config.COLORED_LOGS, debug=config.DEBUG, syslog_address=syslog_address)
+    _logger = TaranisBotLogger(module=module, debug=debug, colored=colored, syslog_address=syslog_address)
 
-
-def get_logger() -> Logger:
-    """
-    Return the configured logger. If not configured yet, build it from the base settings.
-    """
+def get_logger() -> TaranisBotLogger:
     global _logger
     if _logger is None:
-        configure_logger()
-    assert _logger is not None, "Logger was not configured correctly"
+        raise RuntimeError("Logger not configured. Call configure_logger(...) first.")
     return _logger
-
-_logger: Logger | None = None
