@@ -1,7 +1,7 @@
 import requests
 
 
-def get_modelinfo(model_name: str) -> dict:
+def get_hf_modelinfo(model_name: str) -> dict:
     """
     Fetch model metadata from Hugging Face.
     If anything fails, return a simple fallback.
