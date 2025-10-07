@@ -1,6 +1,6 @@
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from pydantic import field_validator, ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
