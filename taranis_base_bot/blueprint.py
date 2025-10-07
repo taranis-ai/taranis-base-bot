@@ -1,4 +1,4 @@
-from typing import Callable, Any, Dict, Optional, List
+from typing import Callable, Any, Dict, List
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 
@@ -57,15 +57,15 @@ def create_service_blueprint(
     predict_fn: Callable[..., Any],
     modelinfo_provider: Callable[[], Any],
     request_parser: Callable[[JSON], Dict[str, Any]],
-    method_decorators: Optional[List[Callable]] = None,
-) -> Blueprint:
+    method_decorators: List[Callable] | None = None
+    ):
     """
     Returns a Blueprint with three routes:
       POST   "/"         -> InferenceView
       GET    "/health"   -> HealthView
       GET    "/modelinfo"-> ModelInfoView
 
-    - `method_decorators` are applied to the POST method (e.g., api_key).
+    - `method_decorators` are applied to the POST method
     """
     bp = Blueprint(name, __name__, url_prefix=url_prefix)
 
