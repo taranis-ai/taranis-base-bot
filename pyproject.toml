@@ -15,10 +15,8 @@ dependencies = [
     "flask",
     "requests",
     "granian",
-    "torch",
     "pydantic-settings",
     "python-dotenv",
-    "simplemma>=1.1.2",
     "requests-mock>=1.12.1",
 ]
 dynamic = ["version"]
