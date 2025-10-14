@@ -2,7 +2,7 @@
 name = "taranis-base-bot"
 description = "Base repo for taranis bots"
 readme = "README.md"
-license = {file = "LICENSE.md"}
+license = "EUPL-1.2"
 maintainers = [{ name = "AIT", email = "lukas.linauer@ait.ac.at" }]
 classifiers = [
     "Programming Language :: Python",
@@ -37,7 +37,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
-tag_regex = "^refs/pull/(\\d+)/merge$"
+tag_regex = "^(v[0-9].[0-9].[0-9])"
+local_scheme = "no-local-version"
 
 [tool.setuptools]
 packages = ["taranis_base_bot"]
