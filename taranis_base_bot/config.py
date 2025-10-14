@@ -5,12 +5,9 @@ from typing import Dict, Optional
 from pydantic import field_validator, ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class CommonSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     MODULE_ID: str = "TaranisBot"
     DEBUG: bool = False
@@ -28,6 +25,7 @@ class CommonSettings(BaseSettings):
         if not isinstance(v, str) or not v.strip():
             print("API_KEY is not set or empty, disabling API key requirement")
         return v
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> CommonSettings:

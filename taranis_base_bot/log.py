@@ -10,8 +10,7 @@ from flask import request
 
 
 class TaranisBotLogger:
-    def __init__(self, module: str, debug: bool, colored: bool,
-                 syslog_address: Optional[tuple[str, int]]):
+    def __init__(self, module: str, debug: bool, colored: bool, syslog_address: Optional[tuple[str, int]]):
         stream_handler = logging.StreamHandler(stream=sys.stdout)
         if colored:
             stream_handler.setFormatter(TaranisLogFormatter(module))
@@ -21,9 +20,7 @@ class TaranisBotLogger:
         sys_log_handler = None
         if syslog_address:
             try:
-                sys_log_handler = logging.handlers.SysLogHandler(
-                    address=syslog_address, socktype=socket.SOCK_STREAM
-                )
+                sys_log_handler = logging.handlers.SysLogHandler(address=syslog_address, socktype=socket.SOCK_STREAM)
             except Exception:
                 print("Unable to connect to syslog server!")
 
@@ -35,15 +32,25 @@ class TaranisBotLogger:
             self.logger.addHandler(sys_log_handler)
         self.logger.addHandler(stream_handler)
 
-    def debug(self, message): self.logger.debug(message)
+    def debug(self, message):
+        self.logger.debug(message)
+
     def exception(self, message=None):
-        if message: 
+        if message:
             self.logger.debug(message)
         self.logger.debug(traceback.format_exc())
-    def info(self, message): self.logger.info(message)
-    def critical(self, message): self.logger.critical(message)
-    def warning(self, message): self.logger.warning(message)
-    def error(self, message): self.logger.error(message)
+
+    def info(self, message):
+        self.logger.info(message)
+
+    def critical(self, message):
+        self.logger.critical(message)
+
+    def warning(self, message):
+        self.logger.warning(message)
+
+    def error(self, message):
+        self.logger.error(message)
 
 
 class TaranisLogFormatter(logging.Formatter):
@@ -91,6 +98,7 @@ class Logger(TaranisBotLogger):
 
 _logger: TaranisBotLogger | None = None
 
+
 def configure_logger(
     *,
     module: str,
@@ -98,9 +106,9 @@ def configure_logger(
     colored: bool,
     syslog_address: Optional[tuple[str, int]] = None,
 ) -> None:
-
     global _logger
     _logger = TaranisBotLogger(module=module, debug=debug, colored=colored, syslog_address=syslog_address)
+
 
 def get_logger() -> TaranisBotLogger:
     global _logger

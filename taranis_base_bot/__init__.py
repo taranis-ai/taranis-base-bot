@@ -6,7 +6,15 @@ from taranis_base_bot.decorators import api_key_required
 from taranis_base_bot.blueprint import JSON
 from taranis_base_bot.log import configure_logger
 
-def create_app(name: str, url_prefix: str, predict_fn: Callable[..., Any], modelinfo_fn: Callable[[], Any], request_parser: Callable[[JSON], dict[str, Any]], method_decorators: list[Callable]) -> Flask:
+
+def create_app(
+    name: str,
+    url_prefix: str,
+    predict_fn: Callable[..., Any],
+    modelinfo_fn: Callable[[], Any],
+    request_parser: Callable[[JSON], dict[str, Any]],
+    method_decorators: list[Callable],
+) -> Flask:
     app = Flask(name)
     config = get_settings()
     app.config.from_object(config)
@@ -25,10 +33,11 @@ def create_app(name: str, url_prefix: str, predict_fn: Callable[..., Any], model
         predict_fn=predict_fn,
         modelinfo_fn=modelinfo_fn,
         request_parser=request_parser,
-        method_decorators=method_decorators
+        method_decorators=method_decorators,
     )
     app.register_blueprint(bp)
     return app
+
 
 def create_empty_app() -> Flask:
     return create_app(
@@ -37,8 +46,9 @@ def create_empty_app() -> Flask:
         predict_fn=lambda x: x,
         modelinfo_fn=lambda: {"model": "test"},
         request_parser=lambda x: x,
-        method_decorators=[api_key_required]
+        method_decorators=[api_key_required],
     )
+
 
 if __name__ == "__main__":
     raise SystemExit("Cannot run taranis-base-bot directly. Use 'from taranis-base-bot import create_app' instead.")

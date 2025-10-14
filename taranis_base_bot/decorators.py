@@ -2,6 +2,7 @@ from functools import wraps
 from flask import request, current_app
 from taranis_base_bot.log import get_logger
 
+
 def api_key_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -19,4 +20,5 @@ def api_key_required(fn):
             return {"error": "not authorized"}, 401
 
         return fn(*args, **kwargs)
+
     return wrapper

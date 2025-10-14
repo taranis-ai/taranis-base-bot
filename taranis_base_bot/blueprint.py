@@ -4,6 +4,7 @@ from flask.views import MethodView
 
 JSON = Dict[str, Any]
 
+
 class InferenceView(MethodView):
     """
     Generic POST endpoint that:
@@ -11,6 +12,7 @@ class InferenceView(MethodView):
     - calls `predict_fn(**kwargs)`
     - returns JSON
     """
+
     def __init__(
         self,
         predict_fn: Callable[..., Any],
@@ -57,8 +59,8 @@ def create_service_blueprint(
     predict_fn: Callable[..., Any],
     modelinfo_fn: Callable[[], Any],
     request_parser: Callable[[JSON], Dict[str, Any]],
-    method_decorators: List[Callable] | None = None
-    ):
+    method_decorators: List[Callable] | None = None,
+):
     """
     Returns a Blueprint with three routes:
       POST   "/"         -> InferenceView
