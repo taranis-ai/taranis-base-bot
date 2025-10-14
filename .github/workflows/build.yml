@@ -3,7 +3,7 @@ name: Test and Build Containers
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - "**"
   workflow_dispatch:
