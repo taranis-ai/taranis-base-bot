@@ -4,10 +4,9 @@ import logging.handlers
 import socket
 import sys
 import traceback
-from typing import Optional, Callable
+from typing import Optional
 
 from flask import request
-from taranis_base_bot.config import get_settings
 
 
 class TaranisBotLogger:
@@ -38,7 +37,8 @@ class TaranisBotLogger:
 
     def debug(self, message): self.logger.debug(message)
     def exception(self, message=None):
-        if message: self.logger.debug(message)
+        if message: 
+            self.logger.debug(message)
         self.logger.debug(traceback.format_exc())
     def info(self, message): self.logger.info(message)
     def critical(self, message): self.logger.critical(message)
