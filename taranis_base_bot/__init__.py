@@ -41,4 +41,4 @@ def create_empty_app() -> Flask:
     )
 
 if __name__ == "__main__":
-    create_empty_app().run()
+    raise SystemExit("Cannot run taranis-base-bot directly. Use 'from taranis-base-bot import create_app' instead.")
