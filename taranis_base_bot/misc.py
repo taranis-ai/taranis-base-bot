@@ -1,8 +1,7 @@
 import requests
-from functools import lru_cache
 from pydantic_settings import BaseSettings
 from typing import Any, Callable
-
+from importlib import import_module
 from taranis_base_bot.protocols import Predictor
 
 
@@ -23,14 +22,15 @@ def create_request_parser(key: str, val_type: type) -> Callable[[dict], dict]:
     return request_parser
 
 
-@lru_cache(maxsize=1)
 def get_model(config: BaseSettings) -> Predictor:
-    package = __import__(f"{config.PACKAGE_NAME}")
-    module = getattr(package, config.MODEL, None)
-    if module is None:
-        raise ImportError(f"Package {package} has no module named {config.MODEL}. Make sure the file {config.MODEL}.py exists")
+    try:
+        module = import_module(f"{config.PACKAGE_NAME}.{config.MODEL}")
+    except ModuleNotFoundError as e:
+        raise ImportError(
+            f"Package {config.PACKAGE_NAME} has no module named {config.MODEL}. Make sure the file {config.MODEL}.py exists"
+        ) from e
 
-    class_name = "".join(map(str.capitalize, config.MODEL.split("_", "")))  # e.g. awesome_bot -> AwesomeBot
+    class_name = "".join(part.capitalize() for part in config.MODEL.split("_") if part)
     model_class = getattr(module, class_name, None)
     if model_class is None:
         raise ImportError(f"Module {config.MODEL} has no class named {class_name}. Make sure the class exists in {config.MODEL}.py")
