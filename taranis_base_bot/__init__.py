@@ -1,14 +1,35 @@
 from flask import Flask
 from typing import Callable, Any
+from pydantic_settings import BaseSettings
 from taranis_base_bot import blueprint
-from taranis_base_bot.config import get_settings
+from taranis_base_bot.misc import get_model, get_hf_modelinfo, create_request_parser
 from taranis_base_bot.decorators import api_key_required
 from taranis_base_bot.blueprint import JSON
 from taranis_base_bot.log import configure_logger
 
 
+def create_default_bot_app(
+    name: str,
+    config: BaseSettings,
+) -> Flask:
+    model = get_model(config)
+
+    predict_fn = model.predict
+
+    def modelinfo_fn():
+        if config.HF_MODEL_INFO:
+            return get_hf_modelinfo(model.name)
+        else:
+            return model.modelinfo
+
+    request_parser = create_request_parser(config.PAYLOAD_KEY, str)
+
+    return create_app(name, config, "/", predict_fn, modelinfo_fn, request_parser, [api_key_required])
+
+
 def create_app(
     name: str,
+    config: BaseSettings,
     url_prefix: str,
     predict_fn: Callable[..., Any],
     modelinfo_fn: Callable[[], Any],
@@ -16,7 +37,6 @@ def create_app(
     method_decorators: list[Callable],
 ) -> Flask:
     app = Flask(name)
-    config = get_settings()
     app.config.from_object(config)
     app.url_map.strict_slashes = False
 
@@ -37,17 +57,6 @@ def create_app(
     )
     app.register_blueprint(bp)
     return app
-
-
-def create_empty_app() -> Flask:
-    return create_app(
-        name="taranis-base-bot",
-        url_prefix="/",
-        predict_fn=lambda x: x,
-        modelinfo_fn=lambda: {"model": "test"},
-        request_parser=lambda x: x,
-        method_decorators=[api_key_required],
-    )
 
 
 if __name__ == "__main__":
