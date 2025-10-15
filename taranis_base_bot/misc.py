@@ -30,7 +30,7 @@ def get_model(config: BaseSettings) -> Predictor:
     if module is None:
         raise ImportError(f"Package {package} has no module named {config.MODEL}. Make sure the file {config.MODEL}.py exists")
 
-    class_name = config.MODEL.replace("_", "").upper()
+    class_name = "".join(map(str.capitalize, config.MODEL.split("_", "")))  # e.g. awesome_bot -> AwesomeBot
     model_class = getattr(module, class_name, None)
     if model_class is None:
         raise ImportError(f"Module {config.MODEL} has no class named {class_name}. Make sure the class exists in {config.MODEL}.py")
