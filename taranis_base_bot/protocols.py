@@ -10,4 +10,8 @@ class Predictor(Protocol):
     Need to implement predict method
     """
 
+    name: str
+
     def predict(self, **kwargs: Any) -> JSONObj | JSONList: ...
+
+    def modelinfo(self, **kwargs: Any) -> JSONObj | JSONList: ...
