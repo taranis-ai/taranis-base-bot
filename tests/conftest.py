@@ -1,10 +1,11 @@
 import pytest
 
-from taranis_base_bot.config import get_settings
+from taranis_base_bot.config import get_common_settings
 from taranis_base_bot.decorators import api_key_required
-from taranis_base_bot.modelinfo import get_hf_modelinfo
+from taranis_base_bot.misc import get_hf_modelinfo
 
-Config = get_settings()
+Config = get_common_settings()
+
 
 @pytest.fixture
 def client():
@@ -12,15 +13,17 @@ def client():
 
     app = create_app(
         name="taranis_base_bot",
+        config=Config,
         url_prefix="/",
         predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda : {"model": "test"},
+        modelinfo_fn=lambda: {"model": "test"},
         request_parser=lambda x: x,
-        method_decorators=[]
+        method_decorators=[],
     )
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
+
 
 @pytest.fixture
 def client_with_request_parser():
@@ -33,15 +36,17 @@ def client_with_request_parser():
 
     app = create_app(
         name="taranis_base_bot",
+        config=Config,
         url_prefix="/",
         predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda : {"model": "test"},
+        modelinfo_fn=lambda: {"model": "test"},
         request_parser=request_parser,
-        method_decorators=[]
+        method_decorators=[],
     )
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
+
 
 @pytest.fixture
 def client_with_predict():
@@ -54,15 +59,17 @@ def client_with_predict():
 
     app = create_app(
         name="taranis_base_bot",
+        config=Config,
         url_prefix="/",
         predict_fn=predict_func,
-        modelinfo_fn=lambda : {"model": "test"},
+        modelinfo_fn=lambda: {"model": "test"},
         request_parser=lambda x: x,
-        method_decorators=[]
+        method_decorators=[],
     )
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
+
 
 @pytest.fixture
 def client_with_modelinfo_fn():
@@ -70,15 +77,17 @@ def client_with_modelinfo_fn():
 
     app = create_app(
         name="taranis_base_bot",
+        config=Config,
         url_prefix="/",
         predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda : get_hf_modelinfo("test_model"),
+        modelinfo_fn=lambda: get_hf_modelinfo("test_model"),
         request_parser=lambda x: x,
-        method_decorators=[]
+        method_decorators=[],
     )
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
+
 
 @pytest.fixture
 def client_with_api_key(monkeypatch):
@@ -92,11 +101,12 @@ def client_with_api_key(monkeypatch):
 
     app = create_app(
         name="taranis_base_bot_with_api_key",
+        config=Config,
         url_prefix="/",
         predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda : {"model": "test"},
+        modelinfo_fn=lambda: {"model": "test"},
         request_parser=lambda x: x,
-        method_decorators=[api_key_required]
+        method_decorators=[api_key_required],
     )
     app.config["TESTING"] = True
     with app.test_client() as client:

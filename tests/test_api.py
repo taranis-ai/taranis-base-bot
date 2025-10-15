@@ -26,6 +26,7 @@ def test_request_parser_success(client_with_request_parser):
     assert isinstance(data, dict)
     assert data["text"] == "A valid dict"
 
+
 def test_request_parser_invalid_input(client_with_request_parser):
     response = client_with_request_parser.post("/", json={"another_key": "An invalid dict"})
     assert response.status_code == 400
@@ -33,8 +34,9 @@ def test_request_parser_invalid_input(client_with_request_parser):
     assert isinstance(data, dict)
     assert data["error"] == "Data must contain 'text' key"
 
+
 def test_predict_success(client_with_predict):
-    response = client_with_predict.post("/", json={"text": "a"*15})
+    response = client_with_predict.post("/", json={"text": "a" * 15})
     assert response.status_code == 200
     result = response.get_json()
     assert isinstance(result, dict)
@@ -46,6 +48,7 @@ def test_predict_invalid_input(client_with_predict):
     result = response.get_json()
     assert isinstance(result, dict)
     assert result["error"] == "Input is not a string!"
+
 
 def test_invalid_json(client):
     response = client.post("/", data="notjson", content_type="application/json")
@@ -105,6 +108,7 @@ def test_wrong_api_key(client_with_api_key):
     data = response.get_json()
     assert data["error"] == "not authorized"
 
+
 def test_modelinfo_func_ok(requests_mock, client_with_modelinfo_fn):
     requests_mock.get(
         "https://huggingface.co/api/models/test_model",
@@ -127,7 +131,7 @@ def test_modelinfo_func_error(requests_mock, client_with_modelinfo_fn):
     )
 
     response = client_with_modelinfo_fn.get("/modelinfo")
-    assert response.status_code == 200 
+    assert response.status_code == 200
 
     data = response.get_json()
     assert data == {"model": "test_model", "error": "Connection failed"}
