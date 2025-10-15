@@ -18,6 +18,8 @@ class CommonSettings(BaseSettings):
     GIT_INFO: Optional[Dict[str, str]] = None
     CACHE_TYPE: str = "SimpleCache"
     CACHE_DEFAULT_TIMEOUT: int = 300
+    HF_MODEL_INFO: bool = False
+    PAYLOAD_KEY: str = ""
 
     @field_validator("API_KEY", mode="before")
     @classmethod
@@ -28,5 +30,5 @@ class CommonSettings(BaseSettings):
 
 
 @lru_cache(maxsize=1)
-def get_settings() -> CommonSettings:
+def get_common_settings() -> CommonSettings:
     return CommonSettings()
