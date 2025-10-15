@@ -9,7 +9,7 @@ from taranis_base_bot.log import configure_logger
 
 
 def create_default_bot_app(
-    name: str,
+    app_name: str,
     config: BaseSettings,
 ) -> Flask:
     model = get_model(config)
@@ -18,13 +18,13 @@ def create_default_bot_app(
 
     def modelinfo_fn():
         if config.HF_MODEL_INFO:
-            return get_hf_modelinfo(model.name)
+            return get_hf_modelinfo(model.model_name)
         else:
             return model.modelinfo
 
     request_parser = create_request_parser(config.PAYLOAD_KEY, str)
 
-    return create_app(name, config, "/", predict_fn, modelinfo_fn, request_parser, [api_key_required])
+    return create_app(app_name, config, "/", predict_fn, modelinfo_fn, request_parser, [api_key_required])
 
 
 def create_app(
@@ -36,7 +36,7 @@ def create_app(
     request_parser: Callable[[JSON], dict[str, Any]],
     method_decorators: list[Callable],
 ) -> Flask:
-    app = Flask(name)
+    app = Flask(__name__)
     app.config.from_object(config)
     app.url_map.strict_slashes = False
 
