@@ -8,44 +8,50 @@ from taranis_base_bot.blueprint import JSON
 from taranis_base_bot.log import configure_logger
 
 
-def create_default_bot_app(
-    app_name: str,
-    config: BaseSettings,
-) -> Flask:
-    model = get_model(config)
-
-    predict_fn = model.predict
-
-    def modelinfo_fn():
-        if config.HF_MODEL_INFO:
-            return get_hf_modelinfo(model.model_name)
-        else:
-            return model.modelinfo
-
-    request_parser = create_request_parser(config.PAYLOAD_KEY, str)
-
-    return create_app(app_name, config, "/", predict_fn, modelinfo_fn, request_parser, [api_key_required])
-
-
 def create_app(
     name: str,
     config: BaseSettings,
-    url_prefix: str,
-    predict_fn: Callable[..., Any],
-    modelinfo_fn: Callable[[], Any],
-    request_parser: Callable[[JSON], dict[str, Any]],
-    method_decorators: list[Callable],
+    url_prefix: str = "/",
+    predict_fn: Callable[..., Any] | None = None,
+    modelinfo_fn: Callable[[], Any] | None = None,
+    request_parser: Callable[[JSON], dict[str, Any]] | None = None,
+    method_decorators: list[Callable] | None = None,
+    setup_logging: bool = True,
 ) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config)
     app.url_map.strict_slashes = False
 
-    configure_logger(
-        module=config.MODULE_ID,
-        debug=config.DEBUG,
-        colored=config.COLORED_LOGS,
-        syslog_address=None,
-    )
+    if setup_logging:
+        configure_logger(
+            module=config.MODULE_ID,
+            debug=config.DEBUG,
+            colored=config.COLORED_LOGS,
+            syslog_address=None,
+        )
+
+    model = None
+    if predict_fn is None or modelinfo_fn is None:
+        model = get_model(config)
+
+    if predict_fn is None:
+        predict_fn = model.predict  # type: ignore[assignment]
+
+    if modelinfo_fn is None:
+
+        def default_modelinfo_fn():
+            if config.HF_MODEL_INFO:
+                return get_hf_modelinfo(model.model_name)  # type: ignore[attr-defined]
+            else:
+                return model.modelinfo  # type: ignore[attr-defined]
+
+        modelinfo_fn = default_modelinfo_fn
+
+    if request_parser is None:
+        request_parser = create_request_parser(config.PAYLOAD_KEY, str)
+
+    if method_decorators is None:
+        method_decorators = [api_key_required]
 
     bp = blueprint.create_service_blueprint(
         name=name,
