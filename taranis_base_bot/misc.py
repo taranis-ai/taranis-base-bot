@@ -8,14 +8,14 @@ from taranis_base_bot.protocols import Predictor
 def create_request_parser(key: str, val_type: type) -> Callable[[dict], dict]:
     def request_parser(data: dict) -> dict[str, Any]:
         if key not in data:
-            raise ValueError("Payload does not contain '{key}' key!")
+            raise ValueError(f"Payload does not contain '{key}' key!")
         val = data[key]
 
         if val is None or not val:
-            raise ValueError("No data provied for '{key}' key!")
+            raise ValueError(f"No data provied for '{key}' key!")
 
         if not isinstance(val, val_type):
-            raise ValueError("Data for '{key}' is not of type '{val_type}'")
+            raise ValueError(f"Data for '{key}' is not of type '{val_type}'")
 
         return {key: val}
 
