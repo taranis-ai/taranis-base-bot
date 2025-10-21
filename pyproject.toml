@@ -15,14 +15,12 @@ dependencies = [
     "flask",
     "requests",
     "granian",
-    "pydantic-settings",
-    "python-dotenv",
-    "requests-mock>=1.12.1",
+    "pydantic-settings"
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["pytest", "jsonschema", "ruff"]
+dev = ["pytest", "jsonschema", "ruff", "requests-mock>=1.12.1", "python-dotenv"]
 
 [project.urls]
 "Source Code" = "https://github.com/taranis-ai/taranis-base-bot"
