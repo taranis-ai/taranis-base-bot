@@ -19,7 +19,7 @@ class CommonSettings(BaseSettings):
     CACHE_TYPE: str = "SimpleCache"
     CACHE_DEFAULT_TIMEOUT: int = 300
     HF_MODEL_INFO: bool = False
-    PAYLOAD_KEY: str = ""
+    PAYLOAD_KEY: str
 
     @field_validator("API_KEY", mode="before")
     @classmethod
