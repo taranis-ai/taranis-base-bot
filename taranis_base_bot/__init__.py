@@ -1,16 +1,16 @@
 from flask import Flask
 from typing import Callable, Any
-from pydantic_settings import BaseSettings
 from taranis_base_bot import blueprint
 from taranis_base_bot.misc import get_model, get_hf_modelinfo, create_request_parser
 from taranis_base_bot.decorators import api_key_required
 from taranis_base_bot.blueprint import JSON
 from taranis_base_bot.log import configure_logger
+from taranis_base_bot.config import CommonSettings
 
 
 def create_app(
     name: str,
-    config: BaseSettings,
+    config: CommonSettings,
     url_prefix: str = "/",
     predict_fn: Callable[..., Any] | None = None,
     modelinfo_fn: Callable[[], Any] | None = None,
@@ -24,7 +24,7 @@ def create_app(
 
     if setup_logging:
         configure_logger(
-            module=config.MODULE_ID,
+            module=config.PACKAGE_NAME,
             debug=config.DEBUG,
             colored=config.COLORED_LOGS,
             syslog_address=None,
@@ -43,7 +43,7 @@ def create_app(
             if config.HF_MODEL_INFO:
                 return get_hf_modelinfo(model.model_name)  # type: ignore[attr-defined]
             else:
-                return model.modelinfo  # type: ignore[attr-defined]
+                return model.model_name  # type: ignore[attr-defined]
 
         modelinfo_fn = default_modelinfo_fn
 
