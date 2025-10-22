@@ -9,7 +9,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class CommonSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    MODULE_ID: str = "TaranisBot"
     DEBUG: bool = False
     API_KEY: str = ""
 
@@ -18,8 +17,11 @@ class CommonSettings(BaseSettings):
     GIT_INFO: Optional[Dict[str, str]] = None
     CACHE_TYPE: str = "SimpleCache"
     CACHE_DEFAULT_TIMEOUT: int = 300
+
+    MODEL: str = ""
+    PACKAGE_NAME = "taranis_bot"
     HF_MODEL_INFO: bool = False
-    PAYLOAD_KEY: str
+    PAYLOAD_KEY: str = "key"
 
     @field_validator("API_KEY", mode="before")
     @classmethod
