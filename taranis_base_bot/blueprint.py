@@ -2,6 +2,8 @@ from typing import Callable, Any, Dict, List
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 
+from taranis_base_bot.log import get_logger
+
 JSON = Dict[str, Any]
 
 
@@ -24,18 +26,22 @@ class InferenceView(MethodView):
 
     def post(self):
         data = request.get_json()
+        get_logger().debug(f"Payload: {data}")
+
         if not isinstance(data, dict):
             return jsonify({"error": "Payload must be a dict!"}), 400
         try:
             kwargs = self._parse(data)
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            get_logger().error(f"Parsing payload failed with error: {e}")
+            return jsonify({"error": "Could not parse payload. Check bot logs for more details."}), 400
 
         try:
             result = self._predict_fn(**kwargs)
             return jsonify(result)
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            get_logger().error(f"Bot failed with error: {e}")
+            return jsonify({"error": "Bot execution failed. Check bot logs for more details."}), 400
 
 
 class HealthView(MethodView):
