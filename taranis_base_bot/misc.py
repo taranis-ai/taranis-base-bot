@@ -6,18 +6,24 @@ from pydoc import locate
 from taranis_base_bot.protocols import Predictor
 
 
-def create_request_parser(payload_shape: dict[str, str]) -> Callable[[dict], dict]:
+def create_request_parser(PAYLOAD_SCHEMA: dict[str, dict]) -> Callable[[dict], dict]:
     def request_parser(data: dict) -> dict[str, Any]:
         accepted_data = {}
-        for key, data_type in payload_shape.items():
+        for key, key_schema in PAYLOAD_SCHEMA.items():
+            if not key_schema.get("required", True) and key not in data:
+                continue
+
             if key not in data:
                 raise ValueError(f"Payload does not contain '{key}' key!")
-            val = data[key]
+
+            val = data.get(key)
 
             if val is None or not val:
                 raise ValueError(f"No data provided for '{key}' key!")
 
-            if not isinstance(val, locate(data_type)):  # type: ignore
+            data_type = key_schema.get("type")
+
+            if data_type and not isinstance(val, locate(data_type)):  # type: ignore
                 raise ValueError(f"Data for '{key}' is not of type '{data_type}'")
             accepted_data[key] = data[key]
         return accepted_data
