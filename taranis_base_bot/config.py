@@ -19,7 +19,7 @@ class CommonSettings(BaseSettings):
     CACHE_DEFAULT_TIMEOUT: int = 300
 
     MODEL: str = ""
-    PACKAGE_NAME = "taranis_bot"
+    PACKAGE_NAME: str = "taranis_bot"
     HF_MODEL_INFO: bool = False
     PAYLOAD_KEY: str = "key"
 
