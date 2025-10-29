@@ -4,12 +4,17 @@ from typing import Any, Callable
 from importlib import import_module
 from pydoc import locate
 from taranis_base_bot.protocols import Predictor
+from taranis_base_bot.log import get_logger
 
 
-def create_request_parser(PAYLOAD_SCHEMA: dict[str, dict]) -> Callable[[dict], dict]:
+def create_request_parser(payload_schema: dict[str, dict]) -> Callable[[dict], dict]:
     def request_parser(data: dict) -> dict[str, Any]:
+        unexpected_keys = set(data) - set(payload_schema)
+        if unexpected_keys:
+            get_logger().warning(f"The payload contains unexpected keys: {unexpected_keys}")
+
         accepted_data = {}
-        for key, key_schema in PAYLOAD_SCHEMA.items():
+        for key, key_schema in payload_schema.items():
             if not key_schema.get("required", True) and key not in data:
                 continue
 
