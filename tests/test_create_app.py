@@ -7,7 +7,6 @@ def test_default_modelinfo_uses_hf_when_enabled(monkeypatch):
 
     class DummyModel:
         model_name = "hf-model"
-        modelinfo = {"should_not_be_used": True}
 
         def predict(self, **kw):
             return kw
@@ -37,12 +36,11 @@ def test_default_modelinfo_uses_hf_when_enabled(monkeypatch):
         assert r.get_json() == {"source": "hf", "name": "hf-model"}
 
 
-def test_default_modelinfo_uses_local_when_disabled(monkeypatch):
+def test_default_modelinfo_uses_name_when_disabled(monkeypatch):
     import taranis_base_bot as pkg
 
     class DummyModel:
         model_name = "hf-model"
-        modelinfo = {"source": "local"}
 
         def predict(self, **kw):
             return kw
@@ -68,7 +66,7 @@ def test_default_modelinfo_uses_local_when_disabled(monkeypatch):
     with app.test_client() as c:
         r = c.get("/modelinfo")
         assert r.status_code == 200
-        assert r.get_json() == {"source": "local"}
+        assert r.get_json() == "hf-model"
 
 
 def test_default_request_parser_uses_config_payload_key(monkeypatch):
@@ -76,7 +74,6 @@ def test_default_request_parser_uses_config_payload_key(monkeypatch):
 
     class DummyModel:
         model_name = "m"
-        modelinfo = {"m": True}
 
         def predict(self, **kw):
             return kw
@@ -101,8 +98,7 @@ def test_url_prefix_routes(monkeypatch):
     import taranis_base_bot as pkg
 
     class DummyModel:
-        model_name = "m"
-        modelinfo = {"mi": True}
+        model_name = "test_model"
 
         def predict(self, **kw):
             return kw
@@ -125,7 +121,7 @@ def test_url_prefix_routes(monkeypatch):
 
         r2 = c.get("/v1/modelinfo")
         assert r2.status_code == 200
-        assert r2.get_json() == {"mi": True}
+        assert r2.get_json() == "test_model"
 
         r3 = c.post("/v1/", json={"text": "hello"})
         assert r3.status_code == 200
