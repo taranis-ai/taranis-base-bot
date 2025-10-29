@@ -24,7 +24,6 @@ def create_app(
 
     if setup_logging:
         configure_logger(
-            module=config.PACKAGE_NAME,
             debug=config.DEBUG,
             colored=config.COLORED_LOGS,
             syslog_address=None,

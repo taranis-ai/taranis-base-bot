@@ -10,12 +10,12 @@ from flask import request
 
 
 class TaranisBotLogger:
-    def __init__(self, module: str, debug: bool, colored: bool, syslog_address: Optional[tuple[str, int]]):
+    def __init__(self, debug: bool, colored: bool, syslog_address: Optional[tuple[str, int]]):
         stream_handler = logging.StreamHandler(stream=sys.stdout)
         if colored:
-            stream_handler.setFormatter(TaranisLogFormatter(module))
+            stream_handler.setFormatter(TaranisLogFormatter())
         else:
-            stream_handler.setFormatter(logging.Formatter(f"[{module}] [%(levelname)s] - %(message)s"))
+            stream_handler.setFormatter(logging.Formatter("[%(levelname)s] - %(message)s"))
 
         sys_log_handler = None
         if syslog_address:
@@ -24,7 +24,7 @@ class TaranisBotLogger:
             except Exception:
                 print("Unable to connect to syslog server!")
 
-        self.logger = logging.getLogger(module)
+        self.logger = logging.getLogger()
         self.logger.handlers.clear()
         self.logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
@@ -54,14 +54,14 @@ class TaranisBotLogger:
 
 
 class TaranisLogFormatter(logging.Formatter):
-    def __init__(self, module):
+    def __init__(self):
         grey = "\x1b[38;20m"
         blue = "\x1b[1;36m"
         yellow = "\x1b[33;20m"
         red = "\x1b[31;20m"
         bold_red = "\x1b[31;1m"
         reset = "\x1b[0m"
-        self.format_string = f"[{module}] [%(levelname)s] - %(message)s"
+        self.format_string = "[%(levelname)s] - %(message)s"
         self.FORMATS = {
             logging.DEBUG: grey + self.format_string + reset,
             logging.INFO: blue + self.format_string + reset,
@@ -101,13 +101,12 @@ _logger: TaranisBotLogger | None = None
 
 def configure_logger(
     *,
-    module: str,
     debug: bool,
     colored: bool,
     syslog_address: Optional[tuple[str, int]] = None,
 ) -> None:
     global _logger
-    _logger = TaranisBotLogger(module=module, debug=debug, colored=colored, syslog_address=syslog_address)
+    _logger = TaranisBotLogger(debug=debug, colored=colored, syslog_address=syslog_address)
 
 
 def get_logger() -> TaranisBotLogger:
