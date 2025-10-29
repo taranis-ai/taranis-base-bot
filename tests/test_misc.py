@@ -25,7 +25,7 @@ def test_create_request_parser_empty_value_string():
     parser = create_request_parser("text", str)
     with pytest.raises(ValueError) as ei:
         parser({"text": ""})
-    assert str(ei.value) == "No data provied for 'text' key!"
+    assert str(ei.value) == "No data provided for 'text' key!"
 
 
 def test_create_request_parser_wrong_type():
@@ -39,7 +39,7 @@ def test_create_request_parser_empty_list_also_rejected():
     parser = create_request_parser("items", list)
     with pytest.raises(ValueError) as ei:
         parser({"items": []})
-    assert str(ei.value) == "No data provied for 'items' key!"
+    assert str(ei.value) == "No data provided for 'items' key!"
 
 
 def _write_module(tmp_path, package_name: str, module_name: str, source: str):
