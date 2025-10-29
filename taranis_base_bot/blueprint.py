@@ -38,6 +38,7 @@ class InferenceView(MethodView):
 
         try:
             result = self._predict_fn(**kwargs)
+            get_logger().debug(f"Bot output: {result}")
             return jsonify(result)
         except Exception as e:
             get_logger().error(f"Bot failed with error: {e}")
