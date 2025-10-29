@@ -40,7 +40,7 @@ def client_with_request_parser():
 
     def request_parser(data: dict[str, str]) -> dict[str, str]:
         if "text" not in data:
-            raise ValueError("Data must contain 'text' key")
+            raise ValueError("Could not parse payload. Check bot logs for more details.")
         return {"text": data["text"]}
 
     app = create_app(
@@ -63,7 +63,7 @@ def client_with_predict():
 
     def predict_func(text: str) -> dict[str, int]:
         if not isinstance(text, str):
-            raise ValueError("Input is not a string!")
+            raise ValueError("Bot execution failed. Check bot logs for more details.")
         return {"len": len(text)}
 
     app = create_app(

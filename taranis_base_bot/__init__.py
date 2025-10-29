@@ -48,7 +48,7 @@ def create_app(
         modelinfo_fn = default_modelinfo_fn
 
     if request_parser is None:
-        request_parser = create_request_parser(config.PAYLOAD_KEY, str)
+        request_parser = create_request_parser(config.PAYLOAD_SHAPE)
 
     if method_decorators is None:
         method_decorators = [api_key_required]

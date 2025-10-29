@@ -2,22 +2,25 @@ import requests
 from pydantic_settings import BaseSettings
 from typing import Any, Callable
 from importlib import import_module
+from pydoc import locate
 from taranis_base_bot.protocols import Predictor
 
 
-def create_request_parser(key: str, val_type: type) -> Callable[[dict], dict]:
+def create_request_parser(payload_shape: dict[str, str]) -> Callable[[dict], dict]:
     def request_parser(data: dict) -> dict[str, Any]:
-        if key not in data:
-            raise ValueError(f"Payload does not contain '{key}' key!")
-        val = data[key]
+        accepted_data = {}
+        for key, data_type in payload_shape.items():
+            if key not in data:
+                raise ValueError(f"Payload does not contain '{key}' key!")
+            val = data[key]
 
-        if val is None or not val:
-            raise ValueError(f"No data provided for '{key}' key!")
+            if val is None or not val:
+                raise ValueError(f"No data provided for '{key}' key!")
 
-        if not isinstance(val, val_type):
-            raise ValueError(f"Data for '{key}' is not of type '{val_type}'")
-
-        return data
+            if not isinstance(val, locate(data_type)):  # type: ignore
+                raise ValueError(f"Data for '{key}' is not of type '{data_type}'")
+            accepted_data[key] = data[key]
+        return accepted_data
 
     return request_parser
 

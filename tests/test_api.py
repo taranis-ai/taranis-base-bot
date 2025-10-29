@@ -32,7 +32,7 @@ def test_request_parser_invalid_input(client_with_request_parser):
     assert response.status_code == 400
     data = response.get_json()
     assert isinstance(data, dict)
-    assert data["error"] == "Data must contain 'text' key"
+    assert data["error"] == "Could not parse payload. Check bot logs for more details."
 
 
 def test_predict_success(client_with_predict):
@@ -47,7 +47,7 @@ def test_predict_invalid_input(client_with_predict):
     response = client_with_predict.post("/", json={"text": ("this", "is", "not", "a", "string")})
     result = response.get_json()
     assert isinstance(result, dict)
-    assert result["error"] == "Input is not a string!"
+    assert result["error"] == "Bot execution failed. Check bot logs for more details."
 
 
 def test_invalid_json(client):

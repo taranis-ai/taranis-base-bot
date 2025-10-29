@@ -69,7 +69,7 @@ def test_default_modelinfo_uses_name_when_disabled(monkeypatch):
         assert r.get_json() == "hf-model"
 
 
-def test_default_request_parser_uses_config_payload_key(monkeypatch):
+def test_default_request_parser_uses_config_payload_shape(monkeypatch):
     import taranis_base_bot as pkg
 
     class DummyModel:
@@ -81,7 +81,7 @@ def test_default_request_parser_uses_config_payload_key(monkeypatch):
     monkeypatch.setattr(pkg, "get_model", lambda _cfg: DummyModel())
 
     cfg = get_common_settings()
-    cfg.PAYLOAD_KEY = "test"
+    cfg.PAYLOAD_SHAPE = {"test": "str"}
 
     app = create_app(
         name="svc-parser",
@@ -106,7 +106,7 @@ def test_url_prefix_routes(monkeypatch):
     monkeypatch.setattr(pkg, "get_model", lambda _cfg: DummyModel())
 
     cfg = get_common_settings()
-    cfg.PAYLOAD_KEY = "text"
+    cfg.PAYLOAD_SHAPE = {"text": "str"}
     app = create_app(
         name="svc-prefixed",
         config=cfg,

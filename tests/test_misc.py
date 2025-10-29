@@ -8,35 +8,35 @@ from taranis_base_bot.misc import create_request_parser, get_model, get_hf_model
 
 
 def test_create_request_parser_success():
-    parser = create_request_parser("text", str)
+    parser = create_request_parser({"text": "str"})
     data = {"text": "hello"}
     out = parser(data)
     assert out == {"text": "hello"}
 
 
 def test_create_request_parser_missing_key():
-    parser = create_request_parser("text", str)
+    parser = create_request_parser({"text": "str"})
     with pytest.raises(ValueError) as ei:
         parser({"other": "x"})
     assert str(ei.value) == "Payload does not contain 'text' key!"
 
 
 def test_create_request_parser_empty_value_string():
-    parser = create_request_parser("text", str)
+    parser = create_request_parser({"text": "str"})
     with pytest.raises(ValueError) as ei:
         parser({"text": ""})
     assert str(ei.value) == "No data provided for 'text' key!"
 
 
 def test_create_request_parser_wrong_type():
-    parser = create_request_parser("text", str)
+    parser = create_request_parser({"text": "str"})
     with pytest.raises(ValueError) as ei:
         parser({"text": 123})
-    assert str(ei.value) == "Data for 'text' is not of type '<class 'str'>'"
+    assert str(ei.value) == "Data for 'text' is not of type 'str'"
 
 
 def test_create_request_parser_empty_list_also_rejected():
-    parser = create_request_parser("items", list)
+    parser = create_request_parser({"items": list})
     with pytest.raises(ValueError) as ei:
         parser({"items": []})
     assert str(ei.value) == "No data provided for 'items' key!"

@@ -21,7 +21,7 @@ class CommonSettings(BaseSettings):
     MODEL: str = ""
     PACKAGE_NAME: str = "taranis_bot"
     HF_MODEL_INFO: bool = False
-    PAYLOAD_KEY: str = "key"
+    PAYLOAD_SHAPE: dict[str, str] = {"key": "str"}
 
     @field_validator("API_KEY", mode="before")
     @classmethod
