@@ -12,12 +12,12 @@ def create_request_parser(key: str, val_type: type) -> Callable[[dict], dict]:
         val = data[key]
 
         if val is None or not val:
-            raise ValueError(f"No data provied for '{key}' key!")
+            raise ValueError(f"No data provided for '{key}' key!")
 
         if not isinstance(val, val_type):
             raise ValueError(f"Data for '{key}' is not of type '{val_type}'")
 
-        return {key: val}
+        return data
 
     return request_parser
 
