@@ -9,6 +9,7 @@ class CommonSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     DEBUG: bool = False
+    SYSLOG_ADDRESS: tuple[str, int] | None = None
     API_KEY: str = ""
 
     COLORED_LOGS: bool = True

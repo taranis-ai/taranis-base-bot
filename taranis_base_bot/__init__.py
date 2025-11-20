@@ -4,7 +4,6 @@ from taranis_base_bot import blueprint
 from taranis_base_bot.misc import get_model, get_hf_modelinfo, create_request_parser
 from taranis_base_bot.decorators import api_key_required
 from taranis_base_bot.blueprint import JSON
-from taranis_base_bot.log import configure_logger
 from taranis_base_bot.config import CommonSettings
 
 
@@ -17,15 +16,12 @@ def create_app(
     request_parser: Callable[[JSON], dict[str, Any]] | None = None,
     method_decorators: list[Callable] | None = None,
 ) -> Flask:
+    from taranis_base_bot.log import logger
+
+    logger.info(f"Creating app for Bot {config.PACKAGE_NAME} with MODEL {config.MODEL}")
     app = Flask(__name__)
     app.config.from_object(config)
     app.url_map.strict_slashes = False
-
-    configure_logger(
-        debug=config.DEBUG,
-        colored=config.COLORED_LOGS,
-        syslog_address=None,
-    )
 
     model = None
     if predict_fn is None or modelinfo_fn is None:
