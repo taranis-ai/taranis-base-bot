@@ -1,5 +1,4 @@
 from datetime import datetime
-from functools import lru_cache
 from typing import Dict, Optional
 
 from pydantic import field_validator, ValidationInfo
@@ -31,6 +30,5 @@ class CommonSettings(BaseSettings):
         return v
 
 
-@lru_cache(maxsize=1)
 def get_common_settings() -> CommonSettings:
     return CommonSettings()
