@@ -16,18 +16,16 @@ def create_app(
     modelinfo_fn: Callable[[], Any] | None = None,
     request_parser: Callable[[JSON], dict[str, Any]] | None = None,
     method_decorators: list[Callable] | None = None,
-    setup_logging: bool = True,
 ) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config)
     app.url_map.strict_slashes = False
 
-    if setup_logging:
-        configure_logger(
-            debug=config.DEBUG,
-            colored=config.COLORED_LOGS,
-            syslog_address=None,
-        )
+    configure_logger(
+        debug=config.DEBUG,
+        colored=config.COLORED_LOGS,
+        syslog_address=None,
+    )
 
     model = None
     if predict_fn is None or modelinfo_fn is None:

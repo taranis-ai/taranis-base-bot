@@ -8,6 +8,9 @@ from typing import Optional
 
 from flask import request
 
+logger = logging.getLogger("taranis_base_bot")
+logger.addHandler(logging.NullHandler())
+
 
 class TaranisBotLogger:
     def __init__(self, debug: bool, colored: bool, syslog_address: Optional[tuple[str, int]]):
@@ -96,21 +99,11 @@ class Logger(TaranisBotLogger):
         return str(request.data)[:4096].replace("\\r", "").replace("\\n", "").replace(" ", "")[2:-1]
 
 
-_logger: TaranisBotLogger | None = None
-
-
 def configure_logger(
     *,
     debug: bool,
     colored: bool,
     syslog_address: Optional[tuple[str, int]] = None,
 ) -> None:
-    global _logger
-    _logger = TaranisBotLogger(debug=debug, colored=colored, syslog_address=syslog_address)
-
-
-def get_logger() -> TaranisBotLogger:
-    global _logger
-    if _logger is None:
-        raise RuntimeError("Logger not configured. Call configure_logger(...) first.")
-    return _logger
+    global logger
+    logger = TaranisBotLogger(debug=debug, colored=colored, syslog_address=syslog_address).logger
