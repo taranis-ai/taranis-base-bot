@@ -4,10 +4,11 @@ from typing import Any, Callable
 from importlib import import_module
 from pydoc import locate
 from taranis_base_bot.protocols import Predictor
-from taranis_base_bot.log import logger
 
 
 def create_request_parser(payload_schema: dict[str, dict]) -> Callable[[dict], dict]:
+    from taranis_base_bot.log import logger
+
     def request_parser(data: dict) -> dict[str, Any]:
         unexpected_keys = set(data) - set(payload_schema)
         if unexpected_keys:

@@ -7,9 +7,7 @@ import traceback
 from typing import Optional
 
 from flask import request
-
-logger = logging.getLogger("taranis_base_bot")
-logger.addHandler(logging.NullHandler())
+from taranis_base_bot import config
 
 
 class TaranisBotLogger:
@@ -99,11 +97,4 @@ class Logger(TaranisBotLogger):
         return str(request.data)[:4096].replace("\\r", "").replace("\\n", "").replace(" ", "")[2:-1]
 
 
-def configure_logger(
-    *,
-    debug: bool,
-    colored: bool,
-    syslog_address: Optional[tuple[str, int]] = None,
-) -> None:
-    global logger
-    logger = TaranisBotLogger(debug=debug, colored=colored, syslog_address=syslog_address).logger
+logger = TaranisBotLogger(debug=config.Config.DEBUG, colored=config.Config.COLORED_LOGS, syslog_address=config.Config.SYSLOG_ADDRESS)

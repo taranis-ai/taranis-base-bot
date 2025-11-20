@@ -2,8 +2,8 @@ from typing import Callable, Any, Dict, List
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 
-from taranis_base_bot.log import logger
 import json
+
 JSON = Dict[str, Any]
 
 
@@ -25,8 +25,10 @@ class InferenceView(MethodView):
         self._parse = request_parser
 
     def post(self):
+        from taranis_base_bot.log import logger
+
         data = request.get_json()
-        sanitized_payload = json.dumps(data).replace('\r', '').replace('\n', '')
+        sanitized_payload = json.dumps(data).replace("\r", "").replace("\n", "")
         logger.debug(f"Payload: {sanitized_payload}")
 
         if not isinstance(data, dict):
