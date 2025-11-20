@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 
 from taranis_base_bot.log import logger
-
+import json
 JSON = Dict[str, Any]
 
 
@@ -26,7 +26,8 @@ class InferenceView(MethodView):
 
     def post(self):
         data = request.get_json()
-        logger.debug(f"Payload: {data}")
+        sanitized_payload = json.dumps(data).replace('\r', '').replace('\n', '')
+        logger.debug(f"Payload: {sanitized_payload}")
 
         if not isinstance(data, dict):
             return jsonify({"error": "Payload must be a dict!"}), 400
