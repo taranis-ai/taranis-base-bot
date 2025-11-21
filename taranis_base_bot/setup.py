@@ -32,10 +32,10 @@ def setup(
         if modelinfo_fn is None:
 
             def default_modelinfo_fn():
-                if config.HF_MODEL_INFO:
-                    return get_hf_modelinfo(model.model_name)  # type: ignore[attr-defined]
+                if hasattr(model, "model_name") and config.HF_MODEL_INFO:
+                    return get_hf_modelinfo(model.model_name)
                 else:
-                    return model.model_name
+                    return config.MODEL
 
             modelinfo_fn = default_modelinfo_fn
 
@@ -44,6 +44,8 @@ def setup(
 
     if method_decorators is None:
         method_decorators = [api_key_required]
+    else:
+        method_decorators = method_decorators + [api_key_required]
 
     bp = blueprint.create_service_blueprint(
         name=name,

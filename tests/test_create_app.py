@@ -1,115 +1,46 @@
 from taranis_base_bot import create_app
-from taranis_base_bot.config import CommonSettings
 
 
-def test_default_modelinfo_uses_hf_when_enabled(monkeypatch):
-    import taranis_base_bot as pkg
-
-    class DummyModel:
-        model_name = "hf-model"
-
-        def predict(self, **kw):
-            return kw
-
-    def fake_get_model(_cfg):
-        return DummyModel()
-
-    def fake_get_hf_modelinfo(name):
-        assert name == "hf-model"
-        return {"source": "hf", "name": name}
-
-    monkeypatch.setattr(pkg, "get_model", fake_get_model)
-    monkeypatch.setattr(pkg, "get_hf_modelinfo", fake_get_hf_modelinfo)
-
-    cfg = CommonSettings()
-    cfg.HF_MODEL_INFO = True
-
+def test_default_modelinfo_uses_hf_when_enabled(customSettings, fake_pkg, hf_modelinfo_mock):
     app = create_app(
         name="svc-hf",
-        config=cfg,
-        request_parser=lambda x: x,
-        method_decorators=[],
+        config=customSettings,
     )
     with app.test_client() as c:
         r = c.get("/modelinfo")
         assert r.status_code == 200
-        assert r.get_json() == {"source": "hf", "name": "hf-model"}
+        assert r.get_json() == hf_modelinfo_mock
 
 
-def test_default_modelinfo_uses_name_when_disabled(monkeypatch):
-    import taranis_base_bot as pkg
-
-    class DummyModel:
-        model_name = "hf-model"
-
-        def predict(self, **kw):
-            return kw
-
-    def fake_get_model(_cfg):
-        return DummyModel()
-
-    def fake_get_hf_modelinfo(_name):
-        raise AssertionError("HF modelinfo should not be called")
-
-    monkeypatch.setattr(pkg, "get_model", fake_get_model)
-    monkeypatch.setattr(pkg, "get_hf_modelinfo", fake_get_hf_modelinfo)
-
-    cfg = get_common_settings()
-    cfg.HF_MODEL_INFO = False
+def test_default_modelinfo_uses_name_when_disabled(customSettings, fake_pkg):
+    customSettings.HF_MODEL_INFO = False
 
     app = create_app(
         name="svc-local",
-        config=cfg,
-        request_parser=lambda x: x,
-        method_decorators=[],
+        config=customSettings,
     )
     with app.test_client() as c:
         r = c.get("/modelinfo")
         assert r.status_code == 200
-        assert r.get_json() == "hf-model"
+        assert r.get_json() == customSettings.MODEL
 
 
-def test_default_request_parser_uses_config_payload_schema(monkeypatch):
-    import taranis_base_bot as pkg
+def test_default_request_parser_uses_config_payload_schema(customSettings, fake_pkg):
+    customSettings.PAYLOAD_SCHEMA = {"test": {"type": "str", "required": True}}
 
-    class DummyModel:
-        model_name = "m"
-
-        def predict(self, **kw):
-            return kw
-
-    monkeypatch.setattr(pkg, "get_model", lambda _cfg: DummyModel())
-
-    cfg = get_common_settings()
-    cfg.PAYLOAD_SCHEMA = {"test": {"type": "str", "required": True}}
-
-    app = create_app(
-        name="svc-parser",
-        config=cfg,
-        method_decorators=[],
-    )
+    app = create_app(name="svc-parser", config=customSettings, method_decorators=[])
     with app.test_client() as c:
         r = c.post("/", json={"test": "test val"})
         assert r.status_code == 200
         assert r.get_json() == {"test": "test val"}
 
 
-def test_url_prefix_routes(monkeypatch):
-    import taranis_base_bot as pkg
+def test_url_prefix_routes(customSettings, fake_pkg, hf_modelinfo_mock):
+    customSettings.PAYLOAD_SCHEMA = {"text": {"type": "str", "required": True}}
 
-    class DummyModel:
-        model_name = "test_model"
-
-        def predict(self, **kw):
-            return kw
-
-    monkeypatch.setattr(pkg, "get_model", lambda _cfg: DummyModel())
-
-    cfg = get_common_settings()
-    cfg.PAYLOAD_SCHEMA = {"text": {"type": "str", "required": True}}
     app = create_app(
         name="svc-prefixed",
-        config=cfg,
+        config=customSettings,
         url_prefix="/v1",
         method_decorators=[],
     )
@@ -121,7 +52,7 @@ def test_url_prefix_routes(monkeypatch):
 
         r2 = c.get("/v1/modelinfo")
         assert r2.status_code == 200
-        assert r2.get_json() == "test_model"
+        assert r2.get_json() == hf_modelinfo_mock
 
         r3 = c.post("/v1/", json={"text": "hello"})
         assert r3.status_code == 200
