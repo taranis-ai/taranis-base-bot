@@ -28,6 +28,3 @@ class CommonSettings(BaseSettings):
         if not isinstance(v, str) or not v.strip():
             print("API_KEY is not set or empty, disabling API key requirement")
         return v
-
-
-Config = CommonSettings()

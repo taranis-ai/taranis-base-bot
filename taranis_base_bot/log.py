@@ -8,11 +8,9 @@ import traceback
 
 from flask import request
 
-from taranis_base_bot.config import Config
-
 
 class TaranisBotLogger:
-    def __init__(self, debug: bool, colored: bool, syslog_address: tuple[str, int] | None = None):
+    def __init__(self, debug: bool = False, colored: bool = False, syslog_address: tuple[str, int] | None = None):
         self._debug = debug
         self._colored = colored
         self._syslog_address = syslog_address
@@ -110,4 +108,4 @@ class Logger(TaranisBotLogger):
         return str(request.data)[:4096].replace("\\r", "").replace("\\n", "").replace(" ", "")[2:-1]
 
 
-logger = TaranisBotLogger(debug=Config.DEBUG, colored=Config.COLORED_LOGS, syslog_address=Config.SYSLOG_ADDRESS)
+logger = TaranisBotLogger()
