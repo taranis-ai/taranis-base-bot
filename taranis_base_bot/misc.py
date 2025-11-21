@@ -1,14 +1,14 @@
-import requests
-from pydantic_settings import BaseSettings
-from typing import Any, Callable
 from importlib import import_module
 from pydoc import locate
+from typing import Any, Callable
+
+import requests
+
+from taranis_base_bot.log import logger
 from taranis_base_bot.protocols import Predictor
 
 
 def create_request_parser(payload_schema: dict[str, dict]) -> Callable[[dict], dict]:
-    from taranis_base_bot.log import logger
-
     def request_parser(data: dict) -> dict[str, Any]:
         unexpected_keys = set(data) - set(payload_schema)
         if unexpected_keys:
@@ -37,18 +37,20 @@ def create_request_parser(payload_schema: dict[str, dict]) -> Callable[[dict], d
     return request_parser
 
 
-def get_model(config: BaseSettings) -> Predictor:
+def get_model(config) -> Predictor:
+    package_name = config.PACKAGE_NAME
+    model_name = config.MODEL
+    if not package_name or not model_name:
+        raise ValueError("Both PACKAGE_NAME and MODEL must be set in the configuration")
     try:
-        module = import_module(f"{config.PACKAGE_NAME}.{config.MODEL}")
+        module = import_module(f"{package_name}.{model_name}")
     except ModuleNotFoundError as e:
-        raise ImportError(
-            f"Package {config.PACKAGE_NAME} has no module named {config.MODEL}. Make sure the file {config.MODEL}.py exists"
-        ) from e
+        raise ImportError(f"Package {package_name} has no module named {model_name}. Make sure the file {model_name}.py exists") from e
 
-    class_name = "".join(part.capitalize() for part in config.MODEL.split("_") if part)
+    class_name = "".join(part.capitalize() for part in model_name.split("_") if part)
     model_class = getattr(module, class_name, None)
     if model_class is None:
-        raise ImportError(f"Module {config.MODEL} has no class named {class_name}. Make sure the class exists in {config.MODEL}.py")
+        raise ImportError(f"Module {model_name} has no class named {class_name}. Make sure the class exists in {model_name}.py")
 
     return model_class()
 

@@ -1,37 +1,50 @@
 from __future__ import annotations
+
 import logging
 import logging.handlers
 import socket
 import sys
 import traceback
-from typing import Optional
 
 from flask import request
-from taranis_base_bot import config
+
+from taranis_base_bot.config import Config
 
 
 class TaranisBotLogger:
-    def __init__(self, debug: bool, colored: bool, syslog_address: Optional[tuple[str, int]]):
+    def __init__(self, debug: bool, colored: bool, syslog_address: tuple[str, int] | None = None):
+        self._debug = debug
+        self._colored = colored
+        self._syslog_address = syslog_address
+        self.logger = logging.getLogger()
+        self._apply_config()
+
+    def _apply_config(self) -> None:
         stream_handler = logging.StreamHandler(stream=sys.stdout)
-        if colored:
+        if self._colored:
             stream_handler.setFormatter(TaranisLogFormatter())
         else:
             stream_handler.setFormatter(logging.Formatter("[%(levelname)s] - %(message)s"))
 
-        sys_log_handler = None
-        if syslog_address:
+        sys_log_handler: logging.Handler | None = None
+        if self._syslog_address:
             try:
-                sys_log_handler = logging.handlers.SysLogHandler(address=syslog_address, socktype=socket.SOCK_STREAM)
+                sys_log_handler = logging.handlers.SysLogHandler(address=self._syslog_address, socktype=socket.SOCK_STREAM)
             except Exception:
                 print("Unable to connect to syslog server!")
 
-        self.logger = logging.getLogger()
         self.logger.handlers.clear()
-        self.logger.setLevel(logging.DEBUG if debug else logging.INFO)
+        self.logger.setLevel(logging.DEBUG if self._debug else logging.INFO)
 
         if sys_log_handler:
             self.logger.addHandler(sys_log_handler)
         self.logger.addHandler(stream_handler)
+
+    def reconfigure_from_settings(self, settings) -> None:
+        self._debug = settings.DEBUG
+        self._colored = settings.COLORED_LOGS
+        self._syslog_address = settings.SYSLOG_ADDRESS
+        self._apply_config()
 
     def debug(self, message):
         self.logger.debug(message)
@@ -97,4 +110,4 @@ class Logger(TaranisBotLogger):
         return str(request.data)[:4096].replace("\\r", "").replace("\\n", "").replace(" ", "")[2:-1]
 
 
-logger = TaranisBotLogger(debug=config.Config.DEBUG, colored=config.Config.COLORED_LOGS, syslog_address=config.Config.SYSLOG_ADDRESS)
+logger = TaranisBotLogger(debug=Config.DEBUG, colored=Config.COLORED_LOGS, syslog_address=Config.SYSLOG_ADDRESS)

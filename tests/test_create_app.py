@@ -1,5 +1,5 @@
 from taranis_base_bot import create_app
-from taranis_base_bot.config import get_common_settings
+from taranis_base_bot.config import CommonSettings
 
 
 def test_default_modelinfo_uses_hf_when_enabled(monkeypatch):
@@ -21,7 +21,7 @@ def test_default_modelinfo_uses_hf_when_enabled(monkeypatch):
     monkeypatch.setattr(pkg, "get_model", fake_get_model)
     monkeypatch.setattr(pkg, "get_hf_modelinfo", fake_get_hf_modelinfo)
 
-    cfg = get_common_settings()
+    cfg = CommonSettings()
     cfg.HF_MODEL_INFO = True
 
     app = create_app(

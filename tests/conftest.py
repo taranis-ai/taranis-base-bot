@@ -1,11 +1,11 @@
 import os
-import pytest
 
+import pytest
 from dotenv import load_dotenv
-from taranis_base_bot.config import get_common_settings
+
+from taranis_base_bot.config import CommonSettings
 from taranis_base_bot.decorators import api_key_required
 from taranis_base_bot.misc import get_hf_modelinfo
-from taranis_base_bot import config
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 env_file = os.path.join(base_dir, ".env.test")
@@ -13,8 +13,7 @@ current_path = os.getcwd()
 
 load_dotenv(dotenv_path=env_file, override=True)
 
-Config = get_common_settings()
-config.Config = Config
+Config = CommonSettings()
 
 
 @pytest.fixture
