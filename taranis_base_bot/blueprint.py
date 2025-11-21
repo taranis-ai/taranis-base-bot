@@ -1,10 +1,10 @@
-from typing import Callable, Any, Dict, List
+import json
+from typing import Any, Callable, Dict, List
+
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 
-import json
-
-JSON = Dict[str, Any]
+from taranis_base_bot.log import logger
 
 
 class InferenceView(MethodView):
@@ -25,8 +25,6 @@ class InferenceView(MethodView):
         self._parse = request_parser
 
     def post(self):
-        from taranis_base_bot.log import logger
-
         data = request.get_json()
         sanitized_payload = json.dumps(data).replace("\r", "").replace("\n", "")
         logger.debug(f"Payload: {sanitized_payload}")
@@ -68,7 +66,7 @@ def create_service_blueprint(
     url_prefix: str = "/",
     predict_fn: Callable[..., Any],
     modelinfo_fn: Callable[[], Any],
-    request_parser: Callable[[JSON], Dict[str, Any]],
+    request_parser: Callable[[Any], Dict[str, Any]],
     method_decorators: List[Callable] | None = None,
 ):
     """

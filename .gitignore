@@ -1,3 +1,5 @@
 build
+dist
+.DS_Store
 taranis_base_bot.egg-info
 __pycache__

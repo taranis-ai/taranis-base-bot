@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Optional
 
-from pydantic import field_validator, ValidationInfo
+from pydantic import ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,7 +18,6 @@ class CommonSettings(BaseSettings):
     CACHE_TYPE: str = "SimpleCache"
     CACHE_DEFAULT_TIMEOUT: int = 300
 
-    MODEL: str = ""
     PACKAGE_NAME: str = "taranis_bot"
     HF_MODEL_INFO: bool = False
     PAYLOAD_SCHEMA: dict[str, dict] = {"key": {"type": "str", "required": True}}
@@ -29,7 +28,3 @@ class CommonSettings(BaseSettings):
         if not isinstance(v, str) or not v.strip():
             print("API_KEY is not set or empty, disabling API key requirement")
         return v
-
-
-def get_common_settings() -> CommonSettings:
-    return CommonSettings()
