@@ -23,8 +23,7 @@ def create_request_parser(payload_schema: dict[str, dict]) -> Callable[[dict], d
                 raise ValueError(f"Payload does not contain '{key}' key!")
 
             val = data.get(key)
-
-            if val is None or not val:
+            if val is None or (isinstance(val, (tuple, list, str)) and not val):
                 raise ValueError(f"No data provided for '{key}' key!")
 
             data_type = key_schema.get("type")

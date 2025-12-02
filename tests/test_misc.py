@@ -17,6 +17,20 @@ def test_create_request_parser_multi_key():
     assert out == {"text": "hello", "other": "also hello"}
 
 
+def test_create_request_parser_int_key():
+    parser = create_request_parser({"number": {"type": "int", "required": True}})
+    data = {"number": 2}
+    out = parser(data)
+    assert out == {"number": 2}
+
+
+def test_create_request_parser_bool_key():
+    parser = create_request_parser({"flag": {"type": "bool", "required": True}})
+    data = {"flag": False}
+    out = parser(data)
+    assert out == {"flag": False}
+
+
 def test_create_request_parser_optional_key_missing():
     parser = create_request_parser({"required_key": {"type": "str", "required": False}, "opt_key": {"type": "str", "required": False}})
     result = parser({"required_key": "hello"})
@@ -59,7 +73,7 @@ def test_create_request_parser_wrong_type():
 
 
 def test_create_request_parser_empty_list_also_rejected():
-    parser = create_request_parser({"items": {"type": list, "required": True}})
+    parser = create_request_parser({"items": {"type": "list", "required": True}})
     with pytest.raises(ValueError) as ei:
         parser({"items": []})
     assert str(ei.value) == "No data provided for 'items' key!"
