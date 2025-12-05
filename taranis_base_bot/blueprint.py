@@ -68,7 +68,7 @@ def create_service_blueprint(
     *,
     name: str,
     url_prefix: str = "/",
-    predict_fn: Callable[..., Any],
+    predict_fn: Callable[..., Awaitable[Any]] | None = None,
     modelinfo_fn: Callable[[], Any] | Callable[[], Awaitable[Any]],
     request_parser: Callable[[Any], Dict[str, Any]],
     method_decorators: List[Callable] | None = None,
