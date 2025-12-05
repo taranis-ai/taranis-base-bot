@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from flask import Flask
+from quart import Quart
 
 
 def create_app(
@@ -11,7 +11,7 @@ def create_app(
     modelinfo_fn: Callable[[], Any] | None = None,
     request_parser: Callable[[Any], dict[str, Any]] | None = None,
     method_decorators: list[Callable] | None = None,
-) -> Flask:
+) -> Quart:
     from taranis_base_bot.setup import setup
 
     return setup(
