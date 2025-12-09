@@ -22,7 +22,12 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["pytest", "jsonschema", "ruff", "requests-mock>=1.12.1", "python-dotenv"]
+dev = [
+    "pytest",
+    "jsonschema",
+    "ruff",
+    "python-dotenv",
+]
 
 [project.urls]
 "Source Code" = "https://github.com/taranis-ai/taranis-base-bot"
