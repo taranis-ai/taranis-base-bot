@@ -3,7 +3,8 @@ import sys
 import types
 from typing import Literal
 
-import pytest
+import pytest_asyncio
+import respx
 from dotenv import load_dotenv
 
 from taranis_base_bot.config import CommonSettings
@@ -16,7 +17,7 @@ current_path = os.getcwd()
 load_dotenv(dotenv_path=env_file, override=True)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def customSettings():
     class CustomSettings(CommonSettings):
         MODEL: Literal["fake_model", "super", "good"] = "fake_model"
@@ -26,24 +27,27 @@ def customSettings():
     yield CustomSettings()
 
 
-@pytest.fixture
-def client(customSettings):
+@pytest_asyncio.fixture
+async def client(customSettings):
     from taranis_base_bot import create_app
+
+    async def predict_fn(**kwargs):
+        return kwargs
 
     app = create_app(
         name="taranis_base_bot",
         config=customSettings,
-        predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda: {"model": "test"},
+        predict_fn=predict_fn,
+        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
         request_parser=lambda x: x,
     )
     app.config["TESTING"] = True
-    with app.test_client() as client:
+    async with app.test_client() as client:
         yield client
 
 
-@pytest.fixture
-def client_with_request_parser(customSettings):
+@pytest_asyncio.fixture
+async def client_with_request_parser(customSettings):
     from taranis_base_bot import create_app
 
     def request_parser(data: dict[str, str]) -> dict[str, str]:
@@ -51,23 +55,26 @@ def client_with_request_parser(customSettings):
             raise ValueError("Could not parse payload. Check bot logs for more details.")
         return {"text": data["text"]}
 
+    async def predict_fn(**kwargs):
+        return kwargs
+
     app = create_app(
         name="taranis_base_bot",
         config=customSettings,
-        predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda: {"model": "test"},
+        predict_fn=predict_fn,
+        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
         request_parser=request_parser,
     )
     app.config["TESTING"] = True
-    with app.test_client() as client:
+    async with app.test_client() as client:
         yield client
 
 
-@pytest.fixture
-def client_with_predict(customSettings):
+@pytest_asyncio.fixture
+async def client_with_predict(customSettings):
     from taranis_base_bot import create_app
 
-    def predict_func(text: str) -> dict[str, int]:
+    async def predict_func(text: str) -> dict[str, int]:
         if not isinstance(text, str):
             raise ValueError("Bot execution failed. Check bot logs for more details.")
         return {"len": len(text)}
@@ -76,71 +83,74 @@ def client_with_predict(customSettings):
         name="taranis_base_bot",
         config=customSettings,
         predict_fn=predict_func,
-        modelinfo_fn=lambda: {"model": "test"},
+        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
         request_parser=lambda x: x,
     )
     app.config["TESTING"] = True
-    with app.test_client() as client:
+    async with app.test_client() as client:
         yield client
 
 
-@pytest.fixture
-def client_with_modelinfo_fn(customSettings):
+@pytest_asyncio.fixture
+async def client_with_modelinfo_fn(customSettings):
     from taranis_base_bot import create_app
 
+    async def predict_fn(**kwargs):
+        return kwargs
+
     app = create_app(
-        name="taranis_base_bot",
-        config=customSettings,
-        predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda: get_hf_modelinfo("test_model"),
+        name="taranis_base_bot", config=customSettings, predict_fn=predict_fn, modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL)
     )
     app.config["TESTING"] = True
-    with app.test_client() as client:
+    async with app.test_client() as client:
         yield client
 
 
-@pytest.fixture
-def client_with_api_key(customSettings):
+@pytest_asyncio.fixture
+async def client_with_api_key(customSettings):
     """Client with API key authentication enabled"""
     from taranis_base_bot import create_app
 
     customSettings.API_KEY = "test-api-key-123"
 
+    async def predict_fn(**kwargs):
+        return kwargs
+
     app = create_app(
         name="taranis_base_bot_with_api_key",
         config=customSettings,
-        predict_fn=lambda **kwargs: kwargs,
-        modelinfo_fn=lambda: {"model": "test"},
+        predict_fn=predict_fn,
+        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
         request_parser=lambda x: x,
     )
     app.config["TESTING"] = True
-    with app.test_client() as client:
+    async with app.test_client() as client:
         yield client
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def fake_model(customSettings):
     class FakeModel:
         model_name = customSettings.MODEL
 
-        def predict(self, **kwargs):
+        async def predict(self, **kwargs):
             return {**kwargs}
 
     yield FakeModel
 
 
-@pytest.fixture
-def hf_modelinfo_mock(requests_mock, customSettings):
+@pytest_asyncio.fixture
+def hf_modelinfo_mock(customSettings):
     result = {"id": f"{customSettings.MODEL}", "private": False, "tags": [], "downloads": 0}
-    requests_mock.get(
-        f"https://huggingface.co/api/models/{customSettings.MODEL}",
-        json=result,
-        status_code=200,
-    )
-    yield result
+    with respx.mock(base_url="https://huggingface.co") as mock:
+        mock.get(f"/api/models/{customSettings.MODEL}").respond(
+            status_code=200,
+            json=result,
+        )
+        yield result
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def fake_pkg(monkeypatch, fake_model, customSettings):
     pkg = types.ModuleType(customSettings.PACKAGE_NAME)
     pkg.__path__ = []
