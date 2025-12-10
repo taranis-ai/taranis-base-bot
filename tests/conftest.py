@@ -3,6 +3,7 @@ import sys
 import types
 from typing import Literal
 
+import pytest
 import pytest_asyncio
 import respx
 from dotenv import load_dotenv
@@ -17,8 +18,8 @@ current_path = os.getcwd()
 load_dotenv(dotenv_path=env_file, override=True)
 
 
-@pytest_asyncio.fixture
-def customSettings():
+@pytest.fixture
+def custom_settings():
     class CustomSettings(CommonSettings):
         MODEL: Literal["fake_model", "super", "good"] = "fake_model"
         PACKAGE_NAME: str = "fake_bot"
@@ -28,7 +29,7 @@ def customSettings():
 
 
 @pytest_asyncio.fixture
-async def client(customSettings):
+async def client(custom_settings):
     from taranis_base_bot import create_app
 
     async def predict_fn(**kwargs):
@@ -36,9 +37,9 @@ async def client(customSettings):
 
     app = create_app(
         name="taranis_base_bot",
-        config=customSettings,
+        config=custom_settings,
         predict_fn=predict_fn,
-        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
+        modelinfo_fn=lambda: get_hf_modelinfo(custom_settings.MODEL),
         request_parser=lambda x: x,
     )
     app.config["TESTING"] = True
@@ -47,7 +48,7 @@ async def client(customSettings):
 
 
 @pytest_asyncio.fixture
-async def client_with_request_parser(customSettings):
+async def client_with_request_parser(custom_settings):
     from taranis_base_bot import create_app
 
     def request_parser(data: dict[str, str]) -> dict[str, str]:
@@ -60,9 +61,9 @@ async def client_with_request_parser(customSettings):
 
     app = create_app(
         name="taranis_base_bot",
-        config=customSettings,
+        config=custom_settings,
         predict_fn=predict_fn,
-        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
+        modelinfo_fn=lambda: get_hf_modelinfo(custom_settings.MODEL),
         request_parser=request_parser,
     )
     app.config["TESTING"] = True
@@ -71,7 +72,7 @@ async def client_with_request_parser(customSettings):
 
 
 @pytest_asyncio.fixture
-async def client_with_predict(customSettings):
+async def client_with_predict(custom_settings):
     from taranis_base_bot import create_app
 
     async def predict_func(text: str) -> dict[str, int]:
@@ -81,9 +82,9 @@ async def client_with_predict(customSettings):
 
     app = create_app(
         name="taranis_base_bot",
-        config=customSettings,
+        config=custom_settings,
         predict_fn=predict_func,
-        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
+        modelinfo_fn=lambda: get_hf_modelinfo(custom_settings.MODEL),
         request_parser=lambda x: x,
     )
     app.config["TESTING"] = True
@@ -92,14 +93,14 @@ async def client_with_predict(customSettings):
 
 
 @pytest_asyncio.fixture
-async def client_with_modelinfo_fn(customSettings):
+async def client_with_modelinfo_fn(custom_settings):
     from taranis_base_bot import create_app
 
     async def predict_fn(**kwargs):
         return kwargs
 
     app = create_app(
-        name="taranis_base_bot", config=customSettings, predict_fn=predict_fn, modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL)
+        name="taranis_base_bot", config=custom_settings, predict_fn=predict_fn, modelinfo_fn=lambda: get_hf_modelinfo(custom_settings.MODEL)
     )
     app.config["TESTING"] = True
     async with app.test_client() as client:
@@ -107,20 +108,20 @@ async def client_with_modelinfo_fn(customSettings):
 
 
 @pytest_asyncio.fixture
-async def client_with_api_key(customSettings):
+async def client_with_api_key(custom_settings):
     """Client with API key authentication enabled"""
     from taranis_base_bot import create_app
 
-    customSettings.API_KEY = "test-api-key-123"
+    custom_settings.API_KEY = "test-api-key-123"
 
     async def predict_fn(**kwargs):
         return kwargs
 
     app = create_app(
         name="taranis_base_bot_with_api_key",
-        config=customSettings,
+        config=custom_settings,
         predict_fn=predict_fn,
-        modelinfo_fn=lambda: get_hf_modelinfo(customSettings.MODEL),
+        modelinfo_fn=lambda: get_hf_modelinfo(custom_settings.MODEL),
         request_parser=lambda x: x,
     )
     app.config["TESTING"] = True
@@ -129,9 +130,9 @@ async def client_with_api_key(customSettings):
 
 
 @pytest_asyncio.fixture
-def fake_model(customSettings):
+def fake_model(custom_settings):
     class FakeModel:
-        model_name = customSettings.MODEL
+        model_name = custom_settings.MODEL
 
         async def predict(self, **kwargs):
             return {**kwargs}
@@ -140,10 +141,10 @@ def fake_model(customSettings):
 
 
 @pytest_asyncio.fixture
-def hf_modelinfo_mock(customSettings):
-    result = {"id": f"{customSettings.MODEL}", "private": False, "tags": [], "downloads": 0}
+def hf_modelinfo_mock(custom_settings):
+    result = {"id": f"{custom_settings.MODEL}", "private": False, "tags": [], "downloads": 0}
     with respx.mock(base_url="https://huggingface.co") as mock:
-        mock.get(f"/api/models/{customSettings.MODEL}").respond(
+        mock.get(f"/api/models/{custom_settings.MODEL}").respond(
             status_code=200,
             json=result,
         )
@@ -151,15 +152,15 @@ def hf_modelinfo_mock(customSettings):
 
 
 @pytest_asyncio.fixture
-def fake_pkg(monkeypatch, fake_model, customSettings):
-    pkg = types.ModuleType(customSettings.PACKAGE_NAME)
+def fake_pkg(monkeypatch, fake_model, custom_settings):
+    pkg = types.ModuleType(custom_settings.PACKAGE_NAME)
     pkg.__path__ = []
 
-    mod = types.ModuleType(f"{customSettings.PACKAGE_NAME}.{customSettings.MODEL}")
+    mod = types.ModuleType(f"{custom_settings.PACKAGE_NAME}.{custom_settings.MODEL}")
 
     mod.FakeModel = fake_model  # type: ignore
 
-    monkeypatch.setitem(sys.modules, customSettings.PACKAGE_NAME, pkg)
-    monkeypatch.setitem(sys.modules, f"{customSettings.PACKAGE_NAME}.{customSettings.MODEL}", mod)
+    monkeypatch.setitem(sys.modules, custom_settings.PACKAGE_NAME, pkg)
+    monkeypatch.setitem(sys.modules, f"{custom_settings.PACKAGE_NAME}.{custom_settings.MODEL}", mod)
 
     yield pkg, mod

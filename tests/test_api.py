@@ -11,17 +11,17 @@ async def test_health_check(client):
 
 
 @pytest.mark.asyncio
-async def test_modelinfo(client, customSettings):
+async def test_modelinfo(client, custom_settings):
     with respx.mock(base_url="https://huggingface.co") as mock:
-        mock.get(f"/api/models/{customSettings.MODEL}").respond(
+        mock.get(f"/api/models/{custom_settings.MODEL}").respond(
             status_code=200,
-            json={"model": customSettings.MODEL},
+            json={"model": custom_settings.MODEL},
         )
 
         response = await client.get("/modelinfo")
         assert response.status_code == 200
         data = await response.get_json()
-        assert data == {"model": customSettings.MODEL}
+        assert data == {"model": custom_settings.MODEL}
 
 
 @pytest.mark.asyncio
@@ -134,28 +134,28 @@ async def test_wrong_api_key(client_with_api_key):
 
 
 @pytest.mark.asyncio
-async def test_modelinfo_func_ok(client_with_modelinfo_fn, customSettings):
+async def test_modelinfo_func_ok(client_with_modelinfo_fn, custom_settings):
     with respx.mock(base_url="https://huggingface.co") as mock:
-        mock.get(f"/api/models/{customSettings.MODEL}").respond(
+        mock.get(f"/api/models/{custom_settings.MODEL}").respond(
             status_code=200,
-            json={"model": customSettings.MODEL, "ok": True},
+            json={"model": custom_settings.MODEL, "ok": True},
         )
 
         response = await client_with_modelinfo_fn.get("/modelinfo")
         assert response.status_code == 200
         data = await response.get_json()
-        assert data == {"model": customSettings.MODEL, "ok": True}
+        assert data == {"model": custom_settings.MODEL, "ok": True}
 
 
 @pytest.mark.asyncio
-async def test_modelinfo_func_error(client_with_modelinfo_fn, customSettings):
+async def test_modelinfo_func_error(client_with_modelinfo_fn, custom_settings):
     with respx.mock(base_url="https://huggingface.co") as mock:
-        mock.get(f"/api/models/{customSettings.MODEL}").mock(side_effect=Exception("Connection failed"))
+        mock.get(f"/api/models/{custom_settings.MODEL}").mock(side_effect=Exception("Connection failed"))
 
         response = await client_with_modelinfo_fn.get("/modelinfo")
         assert response.status_code == 200
         data = await response.get_json()
         assert data == {
-            "model": customSettings.MODEL,
+            "model": custom_settings.MODEL,
             "error": "Connection failed",
         }
