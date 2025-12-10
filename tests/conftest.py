@@ -129,7 +129,7 @@ async def client_with_api_key(custom_settings):
         yield client
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 def fake_model(custom_settings):
     class FakeModel:
         model_name = custom_settings.MODEL
@@ -140,18 +140,17 @@ def fake_model(custom_settings):
     yield FakeModel
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 def hf_modelinfo_mock(custom_settings):
-    result = {"id": f"{custom_settings.MODEL}", "private": False, "tags": [], "downloads": 0}
     with respx.mock(base_url="https://huggingface.co") as mock:
         mock.get(f"/api/models/{custom_settings.MODEL}").respond(
             status_code=200,
-            json=result,
+            json={"model": custom_settings.MODEL},
         )
-        yield result
+        yield {"model": custom_settings.MODEL}
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 def fake_pkg(monkeypatch, fake_model, custom_settings):
     pkg = types.ModuleType(custom_settings.PACKAGE_NAME)
     pkg.__path__ = []
