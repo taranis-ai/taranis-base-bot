@@ -1,5 +1,5 @@
 import pytest
-
+import respx
 from taranis_base_bot.misc import create_request_parser, get_hf_modelinfo
 
 
@@ -79,28 +79,30 @@ def test_create_request_parser_empty_list_also_rejected():
     assert str(ei.value) == "No data provided for 'items' key!"
 
 
-def test_get_hf_modelinfo_http_error(requests_mock):
+@pytest.mark.asyncio
+async def test_get_hf_modelinfo_http_error():
     model_name = "missing-model"
-    requests_mock.get(
-        f"https://huggingface.co/api/models/{model_name}",
-        status_code=404,
-        json={"error": "not found"},
-    )
-    out = get_hf_modelinfo(model_name)
+
+    with respx.mock(base_url="https://huggingface.co") as mock:
+        mock.get(f"/api/models/{model_name}").respond(
+            status_code=404,
+            json={"error": "not found"},
+        )
+
+        out = await get_hf_modelinfo(model_name)
+
     assert out["model"] == model_name
     assert "error" in out
 
 
-def test_get_hf_modelinfo_exception_returns_fallback(monkeypatch):
+@pytest.mark.asyncio
+async def test_get_hf_modelinfo_exception_returns_fallback():
     model_name = "any-model"
 
-    import requests
+    with respx.mock(base_url="https://huggingface.co") as mock:
+        mock.get(f"/api/models/{model_name}").mock(side_effect=RuntimeError("Fail!"))
 
-    def unexpected_error(*a, **k):
-        raise RuntimeError("Fail!")
+        out = await get_hf_modelinfo(model_name)
 
-    monkeypatch.setattr(requests, "get", unexpected_error)
-
-    out = get_hf_modelinfo(model_name)
     assert out["model"] == model_name
     assert out["error"] == "Fail!"

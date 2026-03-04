@@ -1,8 +1,7 @@
 from importlib import import_module
 from pydoc import locate
 from typing import Any, Callable
-
-import requests
+import httpx
 
 from taranis_base_bot.log import logger
 from taranis_base_bot.protocols import Predictor
@@ -54,15 +53,16 @@ def get_model(config) -> Predictor:
     return model_class()
 
 
-def get_hf_modelinfo(model_name: str) -> dict:
+async def get_hf_modelinfo(model_name: str) -> dict:
     """
     Fetch model metadata from Hugging Face.
     If anything fails, return a simple fallback.
     """
+    url = f"https://huggingface.co/api/models/{model_name}"
     try:
-        url = f"https://huggingface.co/api/models/{model_name}"
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        return response.json()
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         return {"model": model_name, "error": str(e)}

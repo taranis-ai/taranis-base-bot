@@ -1,6 +1,6 @@
-from typing import Any, Callable
+from typing import Any, Callable, Awaitable
 
-from flask import Flask
+from quart import Quart
 
 from taranis_base_bot import blueprint
 from taranis_base_bot.decorators import api_key_required
@@ -12,13 +12,13 @@ def setup(
     name: str,
     config,
     url_prefix: str = "/",
-    predict_fn: Callable[..., Any] | None = None,
-    modelinfo_fn: Callable[[], Any] | None = None,
+    predict_fn: Callable[..., Awaitable[Any]] | None = None,
+    modelinfo_fn: Callable[[], Any] | Callable[[], Awaitable[Any]] | None = None,
     request_parser: Callable[[Any], dict[str, Any]] | None = None,
     method_decorators: list[Callable] | None = None,
-) -> Flask:
+) -> Quart:
     logger.info(f"Creating app for Bot {config.PACKAGE_NAME} with MODEL {config.MODEL}")
-    app = Flask(__name__)
+    app = Quart(__name__)
     app.config.from_object(config)
     app.url_map.strict_slashes = False
     logger.reconfigure_from_settings(config)
@@ -31,9 +31,9 @@ def setup(
 
         if modelinfo_fn is None:
 
-            def default_modelinfo_fn():
+            async def default_modelinfo_fn():
                 if hasattr(model, "model_name") and config.HF_MODEL_INFO:
-                    return get_hf_modelinfo(model.model_name)
+                    return await get_hf_modelinfo(model.model_name)
                 else:
                     return config.MODEL
 

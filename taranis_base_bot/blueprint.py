@@ -1,8 +1,9 @@
+import inspect
 import json
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Awaitable
 
-from flask import Blueprint, jsonify, request
-from flask.views import MethodView
+from quart import Blueprint, jsonify, request
+from quart.views import MethodView
 
 from taranis_base_bot.log import logger
 
@@ -17,15 +18,15 @@ class InferenceView(MethodView):
 
     def __init__(
         self,
-        predict_fn: Callable[..., Any],
+        predict_fn: Callable[..., Awaitable[Any]],
         request_parser: Callable[[Any], Dict[str, Any]],
     ) -> None:
         super().__init__()
         self._predict_fn = predict_fn
         self._parse = request_parser
 
-    def post(self):
-        data = request.get_json()
+    async def post(self):
+        data = await request.get_json()
         sanitized_payload = json.dumps(data).replace("\r", "").replace("\n", "")
         logger.debug(f"Payload: {sanitized_payload}")
 
@@ -38,7 +39,7 @@ class InferenceView(MethodView):
             return jsonify({"error": "Could not parse payload. Check bot logs for more details."}), 400
 
         try:
-            result = self._predict_fn(**kwargs)
+            result = await self._predict_fn(**kwargs)
             logger.debug(f"Bot output: {result}")
             return jsonify(result)
         except Exception as e:
@@ -47,7 +48,7 @@ class InferenceView(MethodView):
 
 
 class HealthView(MethodView):
-    def get(self):
+    async def get(self):
         return jsonify({"status": "ok"})
 
 
@@ -56,16 +57,19 @@ class ModelInfoView(MethodView):
         super().__init__()
         self._modelinfo = modelinfo_fn
 
-    def get(self):
-        return jsonify(self._modelinfo())
+    async def get(self):
+        result = self._modelinfo()
+        if inspect.isawaitable(result):
+            result = await result
+        return jsonify(result)
 
 
 def create_service_blueprint(
     *,
     name: str,
     url_prefix: str = "/",
-    predict_fn: Callable[..., Any],
-    modelinfo_fn: Callable[[], Any],
+    predict_fn: Callable[..., Awaitable[Any]] | None = None,
+    modelinfo_fn: Callable[[], Any] | Callable[[], Awaitable[Any]],
     request_parser: Callable[[Any], Dict[str, Any]],
     method_decorators: List[Callable] | None = None,
 ):

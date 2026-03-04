@@ -1,16 +1,14 @@
 from functools import wraps
-
-from flask import current_app, request
-
+from quart import current_app, request
 from taranis_base_bot.log import logger
 
 
 def api_key_required(fn):
     @wraps(fn)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         api_key = (current_app.config.get("API_KEY") or "").strip()
         if not api_key:
-            return fn(*args, **kwargs)
+            return await fn(*args, **kwargs)
 
         auth = request.headers.get("Authorization", "")
         if not auth.startswith("Bearer "):
@@ -20,6 +18,6 @@ def api_key_required(fn):
             logger.warning("Incorrect api key")
             return {"error": "not authorized"}, 401
 
-        return fn(*args, **kwargs)
+        return await fn(*args, **kwargs)
 
     return wrapper
