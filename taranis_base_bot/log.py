@@ -6,7 +6,7 @@ import socket
 import sys
 import traceback
 
-from flask import request
+from quart import request
 
 
 class TaranisBotLogger:
